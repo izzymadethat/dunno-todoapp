@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import Task from "./models/taskItem";
 
 // const todos = [
 //   { id: 1, task: "Walk the dog", isCompleted: false },
@@ -9,25 +11,69 @@ import { useEffect, useState } from "react";
 //   { id: 4, task: "Go to the store", isCompleted: false },
 //   { id: 5, task: "Get Groceries", isCompleted: false },
 // ];
+/**
+ * MyToDo App - Main app
+ *
+ * Todo - set up unique ids using uuid
+ * Todo - handle edit function
+ * Todo - save task to local storage
+ * Todo - refactor functions and components
+ */
 
 const MyTodoApp = () => {
   const [todoItems, setTodoItems] = useState([]);
   const [todoText, setTodoText] = useState("");
   const [completeTask, setCompleteTask] = useState(false);
 
+  /**
+   * useEffect
+  //  * Todo - retrieve items from storage
+  //  * Todo - add items as a Task object
+  //  * Todo - setTodoItems to array of Tasks
+   */
   useEffect(() => {
     console.log("MyTodoApp useEffect");
+
+    // get tasks from local storage
+    const storedTasks = JSON.parse(localStorage.getItem("tasks"));
+
+    if (storedTasks) {
+      // create a new task from each task object found
+      const taskInstances = storedTasks.map((task) => {
+        const taskInstance = new Task(task.id, task.task);
+        taskInstance.isCompleted = task.isCompleted;
+        return taskInstance;
+      });
+
+      setTodoItems(taskInstances);
+    }
   }, []);
 
+  /**
+   * Handle Submission of task when user creates task input.
+   * - Prevent page from refreshing
+   * - if there is no text upon submission don't do anything
+   * - create new unique id
+   * - create new task object *see ./models/taskItem.js
+   * - save to local storage
+   * - update info
+   *
+   * @param {Event} e event Object
+   * @returns
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!todoText) return;
 
-    setTodoItems([
-      ...todoItems,
-      { id: todoItems.length + 1, task: todoText, isCompleted: false },
-    ]);
+    // create new task id and task
+    const taskId = uuidv4();
+    const newTask = new Task(taskId, todoText);
 
+    // update tasks array, update localStorage, updateState
+    // reset text
+    const updatedTasks = [...todoItems, newTask];
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+    setTodoItems(updatedTasks);
     setTodoText("");
   };
 

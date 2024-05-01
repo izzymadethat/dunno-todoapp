@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import Task from "./models/taskItem";
+import ToDoSection from "./components/ToDoSection";
 
 // const todos = [
 //   { id: 1, task: "Walk the dog", isCompleted: false },
@@ -23,7 +24,7 @@ import Task from "./models/taskItem";
 const MyTodoApp = () => {
   const [todoItems, setTodoItems] = useState([]);
   const [todoText, setTodoText] = useState("");
-  const [completeTask, setCompleteTask] = useState(false);
+  const [completedTasks, setCompletedTasks] = useState([]);
 
   /**
    * useEffect
@@ -36,6 +37,7 @@ const MyTodoApp = () => {
 
     // get tasks from local storage
     const storedTasks = JSON.parse(localStorage.getItem("tasks"));
+    const completedTasks = JSON.parse(localStorage.getItem("completed_tasks"));
 
     if (storedTasks) {
       // create a new task from each task object found
@@ -46,6 +48,16 @@ const MyTodoApp = () => {
       });
 
       setTodoItems(taskInstances);
+    }
+
+    if (completedTasks) {
+      const completions = completedTasks.map((task) => {
+        const taskInstance = new Task(task.id, task.task);
+        taskInstance.isCompleted = task.isCompleted;
+        return taskInstance;
+      });
+
+      setCompletedTasks(completions);
     }
   }, []);
 
@@ -81,18 +93,40 @@ const MyTodoApp = () => {
     setTodoItems(todoItems.filter((item) => item.id !== id));
   };
 
+  /**
+   * Handle Completion or ReDo of Task when user clicks to complete task.
+   * - filter through task list for task that matches id
+   * - update isCompleted to be opposite of value (!boolean)
+   * - update localStorage to updated toDo List
+   * - add completed task to another stored list called completed_tasks
+   * @param {string} id
+   * @returns
+   */
   const handleTaskComplete = (id) => {
-    setTodoItems(
-      todoItems.map((item) => {
-        if (item.id === id) {
-          return {
-            ...item,
-            isCompleted: !item.isCompleted,
-          };
-        }
-        return item;
-      })
-    );
+    let updatedTask = todoItems.filter((task) => task.id === id)[0];
+
+    if (updatedTask) {
+      updatedTask.isCompleted = !updatedTask.isCompleted;
+
+      if (updatedTask.isCompleted) {
+        todoItems.splice(todoItems.indexOf(updatedTask), 1);
+
+        localStorage.setItem("tasks", JSON.stringify(todoItems));
+        localStorage.setItem(
+          "completed_tasks",
+          JSON.stringify([...completedTasks, updatedTask])
+        );
+      } else {
+        completedTasks.splice(completedTasks.indexOf(updatedTask), 1);
+        localStorage.setItem(
+          "tasks",
+          JSON.stringify([...todoItems, updatedTask])
+        );
+        localStorage.setItem("completed_tasks", JSON.stringify(completedTasks));
+      }
+    } else {
+      window.alert("Task not found!");
+    }
   };
 
   return (
@@ -125,48 +159,7 @@ const MyTodoApp = () => {
         />
         <button type="submit">Submit</button>
       </form>
-
-      {/* Todo Container */}
-      {/* <TodoList data={todoItems} /> */}
-      <div className="grid_container ">
-        {/* ToDo Card */}
-        {/* <TodoCard task={todo.task} onClick={handleTaskComplete} onEdit={handleEdit} onDelete={handleDelete} /> */}
-        {todoItems.map((todo) => (
-          <div
-            key={todo.id}
-            className={`flex_column w-full ${
-              todo.isCompleted ? "bg-yellow-200" : "bg-yellow-300"
-            } task_card`}
-          >
-            <p
-              className={
-                todo.isCompleted === true
-                  ? "task_title line-through"
-                  : "task_title"
-              }
-              onClick={() => handleTaskComplete(todo.id)}
-            >
-              {todo.task}
-            </p>
-            <div className="flex gap-4 items-center">
-              <button
-                type="button"
-                disabled={todo.isCompleted ? true : false}
-                className="task_button"
-              >
-                Edit
-              </button>
-              <button
-                type="button"
-                className="task_button"
-                onClick={() => handleDelete(todo.id)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <ToDoSection todoItems={todoItems} />
     </section>
   );
 };

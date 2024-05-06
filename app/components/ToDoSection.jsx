@@ -4,8 +4,9 @@ const ToDoSection = ({
   todoItems,
   onTaskComplete,
   onTaskDelete,
-  isEditing,
-  onEdit,
+  editingTaskId,
+  onEditChange,
+  onEditSubmit,
 }) => {
   return (
     <div className="grid_container ">
@@ -16,38 +17,33 @@ const ToDoSection = ({
             todo.isCompleted ? "bg-yellow-200" : "bg-yellow-300"
           } task_card`}
         >
-          {isEditing ? (
-            <p>Is currently editing</p>
-          ) : (
-            <>
-              <p
-                className={
-                  todo.isCompleted === true
-                    ? "task_title line-through"
-                    : "task_title"
-                }
-                onClick={() => onTaskComplete(todo.id)}
-              >
-                {todo.task}
-              </p>
-              <div className="flex gap-4 items-center">
-                <button
-                  type="button"
-                  disabled={todo.isCompleted ? true : false}
-                  className="task_button"
-                >
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  className="task_button"
-                  onClick={() => onTaskDelete(todo.id)}
-                >
-                  Delete
-                </button>
-              </div>
-            </>
-          )}
+          <p
+            className={
+              todo.isCompleted === true
+                ? "task_title line-through"
+                : "task_title"
+            }
+            onClick={() => onTaskComplete(todo.id)}
+          >
+            {todo.task}
+          </p>
+          <div className="flex gap-4 items-center">
+            <button
+              type="button"
+              disabled={todo.isCompleted ? true : false}
+              className="task_button"
+              onClick={() => onEditChange(todo.id)}
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              className="task_button"
+              onClick={() => onTaskDelete(todo.id)}
+            >
+              Delete
+            </button>
+          </div>
         </div>
       ))}
     </div>

@@ -29,7 +29,9 @@ const MyTodoApp = () => {
   const [randomQuote, setRandomQuote] = useState("");
 
   // Editing features
-
+  // const [editingTaskId, setEditingTaskId] = useState(null);
+  // const [isEditing, setIsEditing] = useState(true);
+  // const [editedText, setEditedText] = useState("");
   /**
    * useEffect
   //  * Todo - retrieve items from storage
@@ -180,6 +182,22 @@ const MyTodoApp = () => {
       window.alert("Task not found");
     }
   };
+
+  // Editing functions
+  // const handleEdit = (id, newText) => {
+  //   const updatedTasks = todoItems.map((task) => {
+  //     if (task.id === id) {
+  //       return { ...task, task: newText };
+  //     }
+
+  //     return task;
+  //   });
+
+  //   setTodoItems(updatedTasks);
+  //   localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+
+  //   setEditingTaskId(null);
+  // };
 
   const completedTasksSection = (
     <section className="w-full">

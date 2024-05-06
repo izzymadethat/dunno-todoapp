@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import Task from "./models/taskItem";
 import ToDoSection from "./components/ToDoSection";
+import getRandomQuote from "./functions/quotes";
 
 // const todos = [
 //   { id: 1, task: "Walk the dog", isCompleted: false },
@@ -25,6 +26,9 @@ const MyTodoApp = () => {
   const [todoItems, setTodoItems] = useState([]);
   const [todoText, setTodoText] = useState("");
   const [completedTasks, setCompletedTasks] = useState([]);
+  const [randomQuote, setRandomQuote] = useState("");
+
+  // Editing features
 
   /**
    * useEffect
@@ -33,15 +37,14 @@ const MyTodoApp = () => {
   //  * Todo - setTodoItems to array of Tasks
    */
   useEffect(() => {
-    console.log("MyTodoApp useEffect");
-
     // get tasks from local storage
-    const storedTasks = JSON.parse(localStorage.getItem("tasks"));
-    const completedTasks = JSON.parse(localStorage.getItem("completed_tasks"));
+    const storedTasks = localStorage.getItem("tasks") || null;
+    const completedTasks = localStorage.getItem("completed_tasks") || null;
 
     if (storedTasks) {
       // create a new task from each task object found
-      const taskInstances = storedTasks.map((task) => {
+      let tasks = JSON.parse(storedTasks);
+      const taskInstances = tasks.map((task) => {
         const taskInstance = new Task(task.id, task.task);
         taskInstance.isCompleted = task.isCompleted;
         return taskInstance;
@@ -51,7 +54,8 @@ const MyTodoApp = () => {
     }
 
     if (completedTasks) {
-      const completions = completedTasks.map((task) => {
+      let tasks = JSON.parse(completedTasks);
+      const completions = tasks.map((task) => {
         const taskInstance = new Task(task.id, task.task);
         taskInstance.isCompleted = task.isCompleted;
         return taskInstance;
@@ -59,6 +63,13 @@ const MyTodoApp = () => {
 
       setCompletedTasks(completions);
     }
+  }, []);
+
+  useEffect(() => {
+    // set a random quote
+    let quote = getRandomQuote();
+
+    setRandomQuote(quote);
   }, []);
 
   /**
@@ -89,8 +100,18 @@ const MyTodoApp = () => {
     setTodoText("");
   };
 
+  /**
+   * Handle when user deletes a task
+   * - filter task that matches task id
+   * - assumes that task to delete isn't completed
+   * - update task list and remove from storage
+   * @param {string} id
+   */
+
   const handleDelete = (id) => {
-    setTodoItems(todoItems.filter((item) => item.id !== id));
+    const updatedTasks = todoItems.filter((item) => item.id !== id);
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+    setTodoItems(updatedTasks);
   };
 
   /**
@@ -103,52 +124,105 @@ const MyTodoApp = () => {
    * @returns
    */
   const handleTaskComplete = (id) => {
-    let updatedTask = todoItems.filter((task) => task.id === id)[0];
+    const activeTasksInStorage = JSON.parse(localStorage.getItem("tasks"));
+    const foundTaskIndex = activeTasksInStorage.findIndex(
+      (task) => task.id === id
+    );
 
-    if (updatedTask) {
-      updatedTask.isCompleted = !updatedTask.isCompleted;
+    if (foundTaskIndex !== -1) {
+      const activeTaskFound = activeTasksInStorage[foundTaskIndex];
+      activeTaskFound.isCompleted = true;
 
-      if (updatedTask.isCompleted) {
-        todoItems.splice(todoItems.indexOf(updatedTask), 1);
+      // remove task from active tasks and add to completed tasks
+      activeTasksInStorage.splice(foundTaskIndex, 1);
+      const updatedCompletedTasks = [...completedTasks, activeTaskFound];
 
-        localStorage.setItem("tasks", JSON.stringify(todoItems));
-        localStorage.setItem(
-          "completed_tasks",
-          JSON.stringify([...completedTasks, updatedTask])
-        );
-      } else {
-        completedTasks.splice(completedTasks.indexOf(updatedTask), 1);
-        localStorage.setItem(
-          "tasks",
-          JSON.stringify([...todoItems, updatedTask])
-        );
-        localStorage.setItem("completed_tasks", JSON.stringify(completedTasks));
-      }
+      // update state and local storage with modified data
+      setTodoItems([...activeTasksInStorage]);
+      setCompletedTasks(updatedCompletedTasks);
+      localStorage.setItem("tasks", JSON.stringify(activeTasksInStorage));
+      localStorage.setItem(
+        "completed_tasks",
+        JSON.stringify(updatedCompletedTasks)
+      );
     } else {
       window.alert("Task not found!");
     }
   };
 
+  const handleResetTask = (id) => {
+    const completedTasksInStorage = JSON.parse(
+      localStorage.getItem("completed_tasks")
+    );
+    const foundTaskIndex = completedTasksInStorage.findIndex(
+      (task) => task.id === id
+    );
+
+    if (foundTaskIndex !== -1) {
+      const foundTask = completedTasksInStorage[foundTaskIndex];
+      foundTask.isCompleted = false;
+
+      // removing task from completed tasks and putting back into active tasks
+      completedTasksInStorage.splice(foundTaskIndex, 1);
+      const updatedActiveTasks = [...todoItems, foundTask];
+
+      // update the state and local storage for both modified storage sets
+      setCompletedTasks([...completedTasksInStorage]);
+      setTodoItems(updatedActiveTasks);
+
+      localStorage.setItem(
+        "completed_tasks",
+        JSON.stringify(completedTasksInStorage)
+      );
+
+      localStorage.setItem("tasks", JSON.stringify(updatedActiveTasks));
+    } else {
+      window.alert("Task not found");
+    }
+  };
+
+  const completedTasksSection = (
+    <section className="w-full">
+      <h3 className="text-3xl font-bold">Completed:</h3>
+      <div className="grid_container">
+        {completedTasks.map((todo) => (
+          <div
+            key={todo.id}
+            className={`flex_column w-full ${
+              todo.isCompleted ? "bg-yellow-200" : "bg-yellow-300"
+            } task_card`}
+          >
+            <p
+              className="task_title line-through"
+              onClick={() => handleResetTask(todo.id)}
+            >
+              {todo.task}
+            </p>
+            <p className="text-xs">(click title to undo completion.)</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+
   return (
     <section className="main">
       <h1 className="main_text text-center">
-        Dunno What <br className="sm:flex hidden" />
-        <span>To Do?!</span>{" "}
+        Dunno What <br className="sm:flex" />
+        <span className="text-6xl lg:text-9xl text-yellow-500">
+          To Do?!
+        </span>{" "}
       </h1>
-      <p className="desc text-center">
+      <p className="max-w-xs desc lg:max-w-none text-center">
         Simply add your list of things you want to do. Click the title once
         you've completed your task, then relax as you know it's been taken care
         of! <br />
         <span className="text-xs">
-          This page does not store your information. All of your tasks will be
-          deleted upon close or refresh
+          This page stores your tasks to your local browser storage, and does
+          not store your personal information. All of your tasks will be
+          available upon close or refresh until you delete them.
         </span>
       </p>
-
-      {/* TodoInput */}
-      {/* SubmitButton */}
-
-      {/* <TodoForm todo={todoText} onInputChange={setTodoText} onSubmit={handleSubmit} /> */}
 
       <form onSubmit={handleSubmit} className="todo_form">
         <input
@@ -159,7 +233,17 @@ const MyTodoApp = () => {
         />
         <button type="submit">Submit</button>
       </form>
-      <ToDoSection todoItems={todoItems} />
+      {todoItems.length <= 0 ? (
+        <p className="text-2xl">{randomQuote}</p>
+      ) : (
+        <ToDoSection
+          todoItems={todoItems}
+          onTaskComplete={handleTaskComplete}
+          onTaskDelete={handleDelete}
+        />
+      )}
+
+      {completedTasks.length > 0 && <>{completedTasksSection}</>}
     </section>
   );
 };

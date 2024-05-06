@@ -21,7 +21,7 @@ const Nav = () => {
         <p className="text-lg font-extrabold tracking-wider uppercase">dunno</p>
       </Link>
 
-      <div className="message">Saving your tasks coming soon!</div>
+      <div className="message">Saved tasks now available!</div>
 
       {/* <div className={"hidden sm:flex gap-4"}>
         <Link href={"/login"}>Login</Link>

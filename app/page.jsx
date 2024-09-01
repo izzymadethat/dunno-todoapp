@@ -114,30 +114,28 @@ const MyTodoApp = () => {
    * @returns
    */
   const handleTaskComplete = (id) => {
-    const activeTasksInStorage = JSON.parse(localStorage.getItem("tasks"));
-    const foundTaskIndex = activeTasksInStorage.findIndex(
-      (task) => task.id === id
-    );
+    const existingTask = todoItems.filter((task) => task.id === id);
 
-    if (foundTaskIndex !== -1) {
-      const activeTaskFound = activeTasksInStorage[foundTaskIndex];
-      activeTaskFound.isCompleted = true;
-
-      // remove task from active tasks and add to completed tasks
-      activeTasksInStorage.splice(foundTaskIndex, 1);
-      const updatedCompletedTasks = [...completedTasks, activeTaskFound];
-
-      // update state and local storage with modified data
-      setTodoItems([...activeTasksInStorage]);
-      setCompletedTasks(updatedCompletedTasks);
-      localStorage.setItem("tasks", JSON.stringify(activeTasksInStorage));
-      localStorage.setItem(
-        "completed_tasks",
-        JSON.stringify(updatedCompletedTasks)
-      );
-    } else {
-      window.alert("Task not found!");
+    // if the task doesn't exist, the array will be empty
+    // therefore the task doesn't exist
+    if (existingTask.length === 0) {
+      window.alert("Task not found");
+      return;
     }
+
+    // update task to be completed
+    const task = existingTask[0];
+    task.isCompleted = !task.isCompleted;
+
+    // update the state and local storage
+    const updatedTasks = todoItems.filter((task) => task.id !== id);
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+    setTodoItems(updatedTasks);
+
+    // update completed tasks
+    const completedTasks = [...completedTasks, task];
+    localStorage.setItem("completed_tasks", JSON.stringify(completedTasks));
+    setCompletedTasks(completedTasks);
   };
 
   const handleResetTask = (id) => {

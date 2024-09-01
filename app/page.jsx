@@ -6,6 +6,7 @@ import Task from "./models/taskItem";
 import ToDoSection from "./components/ToDoSection";
 import getRandomQuote from "./functions/quotes";
 import { getTasks } from "./functions/get-tasks";
+import CompletedTasksSection from "./components/CompletedTasksSection";
 
 /**
  * MyToDo App - Main app
@@ -172,72 +173,62 @@ const MyTodoApp = () => {
   //   setEditingTaskId(null);
   // };
 
-  const completedTasksSection = (
+  const showCompletedTasksSection = (
     <section className="w-full">
       <h3 className="text-3xl font-bold">Completed:</h3>
-      <div className="grid_container">
-        {completedTasks.map((todo) => (
-          <div
-            key={todo.id}
-            className={`flex_column w-full ${
-              todo.isCompleted ? "bg-yellow-200" : "bg-yellow-300"
-            } task_card`}
-          >
-            <p
-              className="task_title line-through"
-              onClick={() => handleResetTask(todo.id)}
-            >
-              {todo.task}
-            </p>
-            <p className="text-xs">(click title to undo completion.)</p>
-          </div>
-        ))}
-      </div>
+      <CompletedTasksSection
+        items={completedTasks}
+        onClickToResetTask={handleResetTask}
+      />
     </section>
   );
 
   return (
-    <section className="main">
-      <h1 className="main_text text-center">
-        Dunno What <br className="sm:flex" />
-        <span className="text-6xl lg:text-9xl text-yellow-500">
-          To Do?!
-        </span>{" "}
-      </h1>
-      <p className="max-w-xs desc lg:max-w-none text-center">
-        Simply add your list of things you want to do. Click the title once
-        you've completed your task, then relax as you know it's been taken care
-        of! <br />
-        <span className="text-xs">
+    <div>
+      <section className="max-w-3xl mx-auto px-8">
+        <h1 className="main_text text-center">
+          Dunno What <br className="sm:hidden" />
+          <span className="text-6xl lg:text-9xl text-yellow-500">
+            TODO?!
+          </span>{" "}
+        </h1>
+        <p className="desc lg:text-center ">
+          Simply add your list of things you want to do. Click the title once
+          you've completed your task, then relax as you know it's been taken
+          care of! <br />
+        </p>
+        <p className="text-[10px] italic lg:text-center">
           This page stores your tasks to your local browser storage, and does
           not store your personal information. All of your tasks will be
           available upon close or refresh until you delete them.
-        </span>
-      </p>
+        </p>
 
-      <form onSubmit={handleSubmit} className="todo_form">
-        <input
-          type="text"
-          placeholder="I need to..."
-          value={todoText}
-          onChange={(e) => setTodoText(e.target.value)}
-        />
-        <button type="submit">Submit</button>
-      </form>
-
-      <div>
-        {todoItems.length > 0 && (
-          <ToDoSection
-            todoItems={todoItems}
-            onTaskComplete={handleTaskComplete}
-            onTaskDelete={handleDelete}
+        <form onSubmit={handleSubmit} className="todo_form">
+          <input
+            type="text"
+            placeholder="I need to..."
+            value={todoText}
+            onChange={(e) => setTodoText(e.target.value)}
           />
-        )}
-        <p className="text-2xl"></p>
-      </div>
+          <button type="submit">Submit</button>
+        </form>
+      </section>
 
-      {completedTasks.length > 0 && <>{completedTasksSection}</>}
-    </section>
+      <section className="max-w-5xl mx-auto px-8">
+        <div>
+          {todoItems.length > 0 && (
+            <ToDoSection
+              items={todoItems}
+              onTaskComplete={handleTaskComplete}
+              onTaskDelete={handleDelete}
+            />
+          )}
+          <p className="text-center">{randomQuote}</p>
+        </div>
+
+        {completedTasks.length > 0 && <>{showCompletedTasksSection}</>}
+      </section>
+    </div>
   );
 };
 

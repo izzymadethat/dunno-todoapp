@@ -1,11 +1,8 @@
 "use client";
 
-import { Inter } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-
-const inter = Inter({ subsets: ["latin"] });
 
 const Nav = () => {
   const [toggleDropdown, setToggleDropdown] = useState(false);
@@ -15,7 +12,7 @@ const Nav = () => {
   };
 
   return (
-    <nav className={`nav_bar ${inter.className}`}>
+    <nav className="flex flex-col sm:flex-row justify-between items-center my-4 px-6">
       <Link href="/" className="flex_center gap-2">
         <Image src="assets/images/logo.svg" alt="logo" width={40} height={40} />
         <p className="text-lg font-extrabold tracking-wider uppercase">dunno</p>

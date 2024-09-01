@@ -7,13 +7,6 @@ import ToDoSection from "./components/ToDoSection";
 import getRandomQuote from "./functions/quotes";
 import { getTasks } from "./functions/get-tasks";
 
-// const todos = [
-//   { id: 1, task: "Walk the dog", isCompleted: false },
-//   { id: 2, task: "Feed the cat", isCompleted: true },
-//   { id: 3, task: "Pet the cat", isCompleted: false },
-//   { id: 4, task: "Go to the store", isCompleted: false },
-//   { id: 5, task: "Get Groceries", isCompleted: false },
-// ];
 /**
  * MyToDo App - Main app
  *
@@ -111,62 +104,56 @@ const MyTodoApp = () => {
    * - update localStorage to updated toDo List
    * - add completed task to another stored list called completed_tasks
    * @param {string} id
-   * @returns
    */
   const handleTaskComplete = (id) => {
-    const existingTask = todoItems.filter((task) => task.id === id);
+    if (!id || typeof id !== "string") return;
 
-    // if the task doesn't exist, the array will be empty
-    // therefore the task doesn't exist
-    if (existingTask.length === 0) {
-      window.alert("Task not found");
-      return;
-    }
+    const taskIndex = todoItems.findIndex((task) => task.id === id);
+    if (taskIndex === -1) return;
 
-    // update task to be completed
-    const task = existingTask[0];
+    const task = todoItems[taskIndex];
     task.isCompleted = !task.isCompleted;
 
-    // update the state and local storage
-    const updatedTasks = todoItems.filter((task) => task.id !== id);
+    const updatedTasks = [...todoItems];
+    updatedTasks.splice(taskIndex, 1);
+
     localStorage.setItem("tasks", JSON.stringify(updatedTasks));
     setTodoItems(updatedTasks);
 
-    // update completed tasks
-    const completedTasks = [...completedTasks, task];
-    localStorage.setItem("completed_tasks", JSON.stringify(completedTasks));
-    setCompletedTasks(completedTasks);
+    const newCompletedTasks = [...completedTasks, task];
+    localStorage.setItem("completed_tasks", JSON.stringify(newCompletedTasks));
+    setCompletedTasks(newCompletedTasks);
   };
 
+  /**
+   * Handle Reset of a task when user clicks to reset task.
+   * - Filter through completed tasks for task that matches id
+   * - Update task to be completed
+   * - Update the state and local storage
+   * - Update completed tasks
+   * @param {string} id
+   */
   const handleResetTask = (id) => {
-    const completedTasksInStorage = JSON.parse(
-      localStorage.getItem("completed_tasks")
+    if (completedTasks.length === 0) return;
+
+    const taskToReset = completedTasks.find((task) => task.id === id);
+
+    if (!taskToReset) return;
+
+    taskToReset.isCompleted = false;
+
+    const updatedCompletedTasks = completedTasks.filter(
+      (task) => task.id !== id
     );
-    const foundTaskIndex = completedTasksInStorage.findIndex(
-      (task) => task.id === id
+    localStorage.setItem(
+      "completed_tasks",
+      JSON.stringify(updatedCompletedTasks)
     );
+    setCompletedTasks(updatedCompletedTasks);
 
-    if (foundTaskIndex !== -1) {
-      const foundTask = completedTasksInStorage[foundTaskIndex];
-      foundTask.isCompleted = false;
-
-      // removing task from completed tasks and putting back into active tasks
-      completedTasksInStorage.splice(foundTaskIndex, 1);
-      const updatedActiveTasks = [...todoItems, foundTask];
-
-      // update the state and local storage for both modified storage sets
-      setCompletedTasks([...completedTasksInStorage]);
-      setTodoItems(updatedActiveTasks);
-
-      localStorage.setItem(
-        "completed_tasks",
-        JSON.stringify(completedTasksInStorage)
-      );
-
-      localStorage.setItem("tasks", JSON.stringify(updatedActiveTasks));
-    } else {
-      window.alert("Task not found");
-    }
+    const updatedTodoTasks = [...todoItems, taskToReset];
+    localStorage.setItem("tasks", JSON.stringify(updatedTodoTasks));
+    setTodoItems(updatedTodoTasks);
   };
 
   // Editing functions
@@ -237,15 +224,17 @@ const MyTodoApp = () => {
         />
         <button type="submit">Submit</button>
       </form>
-      {todoItems.length <= 0 ? (
-        <p className="text-2xl">{randomQuote}</p>
-      ) : (
-        <ToDoSection
-          todoItems={todoItems}
-          onTaskComplete={handleTaskComplete}
-          onTaskDelete={handleDelete}
-        />
-      )}
+
+      <div>
+        {todoItems.length > 0 && (
+          <ToDoSection
+            todoItems={todoItems}
+            onTaskComplete={handleTaskComplete}
+            onTaskDelete={handleDelete}
+          />
+        )}
+        <p className="text-2xl"></p>
+      </div>
 
       {completedTasks.length > 0 && <>{completedTasksSection}</>}
     </section>

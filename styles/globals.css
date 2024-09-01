@@ -7,6 +7,27 @@ footer {
   @apply max-w-3xl min-h-full mx-auto flex justify-center items-center px-3;
 } */
 
+/* Target the scrollbar for WebKit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 12px; /* Width of the scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: #fef6a9; /* Light yellow color for the track */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #f1c40f; /* Sticky note yellow color for the thumb */
+  border-radius: 10px; /* Round edges for the thumb */
+  border: 3px solid #fef6a9; /* Space around the thumb to match the track color */
+}
+
+/* Target the scrollbar for Firefox */
+* {
+  scrollbar-width: thin; /* Width of the scrollbar */
+  scrollbar-color: #f1c40f #fef6a9; /* Thumb color and track color */
+}
+
 .nav_bar {
   @apply relative flex justify-between items-center mx-10 my-5;
 }

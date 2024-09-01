@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import Task from "./models/taskItem";
 import ToDoSection from "./components/ToDoSection";
 import getRandomQuote from "./functions/quotes";
+import { getTasks } from "./functions/get-tasks";
 
 // const todos = [
 //   { id: 1, task: "Walk the dog", isCompleted: false },
@@ -23,6 +24,7 @@ import getRandomQuote from "./functions/quotes";
  */
 
 const MyTodoApp = () => {
+  const [loading, setLoading] = useState(false);
   const [todoItems, setTodoItems] = useState([]);
   const [todoText, setTodoText] = useState("");
   const [completedTasks, setCompletedTasks] = useState([]);
@@ -39,39 +41,24 @@ const MyTodoApp = () => {
   //  * Todo - setTodoItems to array of Tasks
    */
   useEffect(() => {
-    // get tasks from local storage
-    const storedTasks = localStorage.getItem("tasks") || null;
-    const completedTasks = localStorage.getItem("completed_tasks") || null;
+    setLoading(true);
 
-    if (storedTasks) {
-      // create a new task from each task object found
-      let tasks = JSON.parse(storedTasks);
-      const taskInstances = tasks.map((task) => {
-        const taskInstance = new Task(task.id, task.task);
-        taskInstance.isCompleted = task.isCompleted;
-        return taskInstance;
-      });
-
-      setTodoItems(taskInstances);
+    async function fetchAndSetTasks() {
+      // get tasks from local storage
+      const tasks = getTasks();
+      setTodoItems(tasks.todo);
+      setCompletedTasks(tasks.done);
     }
 
-    if (completedTasks) {
-      let tasks = JSON.parse(completedTasks);
-      const completions = tasks.map((task) => {
-        const taskInstance = new Task(task.id, task.task);
-        taskInstance.isCompleted = task.isCompleted;
-        return taskInstance;
-      });
-
-      setCompletedTasks(completions);
+    async function fetchAndSetRandomQuote() {
+      const quote = getRandomQuote();
+      setRandomQuote(quote);
     }
-  }, []);
 
-  useEffect(() => {
-    // set a random quote
-    let quote = getRandomQuote();
+    fetchAndSetTasks();
+    fetchAndSetRandomQuote();
 
-    setRandomQuote(quote);
+    setLoading(false);
   }, []);
 
   /**
@@ -84,13 +71,14 @@ const MyTodoApp = () => {
    * - update info
    *
    * @param {Event} e event Object
-   * @returns
+   * @returns {void} updates todo items and local storage
    */
   const handleSubmit = (e) => {
     e.preventDefault();
+
     if (!todoText) return;
 
-    // create new task id and task
+    // create new task id and Task object
     const taskId = uuidv4();
     const newTask = new Task(taskId, todoText);
 

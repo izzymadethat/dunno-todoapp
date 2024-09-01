@@ -1,9 +1,13 @@
-export function getTasks({ storage, key }) {
-    let tasks = JSON.parse(storage.getItem(key))
-    return tasks;
-}
+export function getTasks() {
+  // get tasks from local storage
+  const incompleteTasks = JSON.parse(localStorage.getItem("tasks")) || null;
+  const completedTasks =
+    JSON.parse(localStorage.getItem("completed_tasks")) || null;
 
-// export function getCompletedTasks() {
-//     let doneTasks = JSON.parse(localStorage.getItem("completed_tasks")) || [];
-//     return doneTasks;
-// }
+  let tasks = {
+    todo: incompleteTasks ?? [],
+    done: completedTasks ?? [],
+  };
+
+  return tasks;
+}

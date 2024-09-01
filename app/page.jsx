@@ -84,7 +84,7 @@ const MyTodoApp = () => {
 
     // update tasks array, update localStorage, updateState
     // reset text
-    const updatedTasks = [...todoItems, newTask];
+    const updatedTasks = [newTask, ...todoItems];
     localStorage.setItem("tasks", JSON.stringify(updatedTasks));
     setTodoItems(updatedTasks);
     setTodoText("");

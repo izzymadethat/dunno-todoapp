@@ -5,8 +5,8 @@ import Footer from "./components/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "ToDo Next App",
-  description: "A simple ToDo App - version 1.0.",
+  title: "Dunno | ToDo App",
+  description: "A simple ToDo App - version 1.0.0",
 };
 
 const RootLayout = ({ children }) => {
@@ -14,7 +14,7 @@ const RootLayout = ({ children }) => {
     <html>
       <body>
         <Nav />
-        <main className={`app ${inter.className}`}>{children}</main>
+        <main className={`${inter.className}`}>{children}</main>
         <Footer />
       </body>
     </html>
